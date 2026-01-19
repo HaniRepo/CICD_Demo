@@ -42,7 +42,7 @@ jobs:
       - name: Run migrations
         run: |
           flyway \
-          -url="jdbc:postgresql://postgres:5432/testdb" \
+          -url="url="jdbc:postgresql://localhost:5432/testdb" \
           -user="testuser" \
           -password="testpass" \
           -locations="filesystem:db/migrations" \
