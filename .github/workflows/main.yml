@@ -1,0 +1,54 @@
+name: Database Migration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U testuser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Download Flyway
+        run: |
+          wget https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.5.13/flyway-commandline-8.5.13-linux-x64.tar.gz
+          tar -xzf flyway-commandline-8.5.13-linux-x64.tar.gz
+          sudo ln -s $(pwd)/flyway-8.5.13/flyway /usr/local/bin/flyway
+
+      - name: Run migrations
+        run: |
+          flyway \
+          -url="jdbc:postgresql://postgres:5432/testdb" \
+          -user="testuser" \
+          -password="testpass" \
+          -locations="filesystem:db/migrations" \
+          migrate     
+          
+                
+      
+  
+          
